@@ -1,9 +1,10 @@
-import { create } from "zustand";
+import { create } from 'zustand'
 
 export const useThemeStore = create((set) => ({
-  theme: localStorage.getItem("streamify-theme") || "coffee",
-  setTheme: (theme) => {
-    localStorage.setItem("streamify-theme", theme);
-    set({ theme });
-  },
-}));
+    theme : localStorage.getItem("SpeakZen-theme") || "coffee",
+    setTheme : (theme)=>{
+        localStorage.setItem("SpeakZen-theme", theme);
+        set({ theme})
+
+    },
+}))
