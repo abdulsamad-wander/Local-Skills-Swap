@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import useAuthUser from "../hooks/useAuthUser";
 import { Link, useLocation } from "react-router";
 import { GiShipWheel } from "react-icons/gi";
@@ -12,12 +12,29 @@ const Sidebar = () => {
   const { authUser } = useAuthUser();
   const location = useLocation();
   const currPath = location.pathname;
+  const [lastViewedCount, setLastViewedCount] = useState(0);
+  
   const { data: friendReqs } = useQuery({
     queryKey: ["friendReqs"],
     queryFn: getFriendReq,
   });
+  
   const incomingReqts = friendReqs?.incomingReqs || [];
   const acceptedReqts = friendReqs?.acceptedReqs || [];
+  const currentTotal = incomingReqts.length + acceptedReqts.length;
+
+  const unseenCount = Math.max(0, currentTotal - lastViewedCount);
+  
+  const handleNotificationClick = () => {
+    setLastViewedCount(currentTotal);
+  };
+  
+  useEffect(() => {
+    if (currPath === "/notifications") {
+      setLastViewedCount(currentTotal);
+    }
+  }, [currPath, currentTotal]);
+  
   return (
     <aside className="w-64 bg-base-200 border-r border-base-300 hidden lg:flex md:flex flex-col h-screen sticky top-0">
       <div className="p-4 border-b border-base-300">
@@ -51,6 +68,7 @@ const Sidebar = () => {
 
         <Link
           to="/notifications"
+          onClick={handleNotificationClick}
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
             currPath === "/notifications" ? "btn-active" : ""
           }`}
@@ -58,9 +76,9 @@ const Sidebar = () => {
           <FaBell className="size-4 text-base-content opacity-70" />
           <span>Notifications</span>
 
-          {incomingReqts.length + acceptedReqts.length > 0 && (
+          {unseenCount > 0 && (
             <span className="badge badge-primary ml-2">
-              {(incomingReqts.length + acceptedReqts.length) > 9 ? "9+" : (incomingReqts.length + acceptedReqts.length)}
+              {unseenCount > 9 ? "9+" : unseenCount}
             </span>
           )}
         </Link>

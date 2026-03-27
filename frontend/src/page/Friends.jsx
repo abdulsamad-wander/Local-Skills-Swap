@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
   getFriends,
@@ -10,7 +10,7 @@ import NoFriendsFound from "../components/NoFriendsFound";
 import FriendCard from "../components/FriendCard";
 
 const Friends = () => {
-  const [requestId, setRequestId] = useState(new Set());
+  const [ setRequestId] = useState(new Set());
   const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
     queryFn: getFriends,
