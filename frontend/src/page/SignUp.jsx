@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { MdLanguage } from "react-icons/md";
-import useSignUp from "../hooks/useSignup";
+import useSignUp from "../hooks/useSignUp";
 import { Link } from "react-router";
 
 const SignUp = () => {
