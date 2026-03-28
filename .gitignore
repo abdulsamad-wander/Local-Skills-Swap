@@ -1,26 +1,53 @@
-# Dependencies
-node_modules/
-package-lock.json
+# Monorepo: package-specific rules live in backend/.gitignore and frontend/.gitignore
 
-# Environment variables
+# Any node_modules at repo root (if you add root dependencies later)
+node_modules/
+
+# Environment at repo root
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
+# Generic build / framework output (root or future packages)
 dist/
+build/
+out/
+.next/
+.nuxt/
+*.tsbuildinfo
+
+# Vercel CLI (if you link from repo root)
+.vercel/
+
+# Test / coverage (root-level tooling)
+coverage/
+.nyc_output/
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+*.local
 
 # OS
 .DS_Store
+Thumbs.db
 
-# IDE
+# IDE / editors
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# Build
-dist/
-build/
+# Optional: local SSL or keys
+*.pem

@@ -28,6 +28,10 @@ app.use(async (req, res, next) => {
   }
 });
 
+app.get("/", (_req, res) => {
+  res.json({ ok: true, service: "speak-zen-api" });
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });

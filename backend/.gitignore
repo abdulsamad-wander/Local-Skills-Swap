@@ -1,10 +1,6 @@
 # Dependencies
 node_modules/
 
-# Vite build & cache
-dist/
-.vite/
-
 # Local environment (secrets)
 .env
 .env.*
@@ -17,3 +13,6 @@ logs/
 # Tests
 coverage/
 .nyc_output/
+
+# Vercel CLI link output (per-project)
+.vercel/
