@@ -1,17 +1,21 @@
 import "dotenv/config";
-import app from "./app.js";
+import app from "./api/index.js";
 import { connectDB } from "./lib/db.js";
 
 const PORT = process.env.PORT || 5000;
 
-async function main() {
-  await connectDB();
-  app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT}`);
-  });
+async function startServer() {
+  try {
+    await connectDB();
+    
+    // Start the Express server locally
+    app.listen(PORT, () => {
+      console.log(`Server is running locally at http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+startServer();
