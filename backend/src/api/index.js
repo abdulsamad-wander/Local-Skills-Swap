@@ -15,7 +15,7 @@ app.use(
   cors({
     origin: allowOrigin,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
@@ -40,8 +40,7 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-// Mount your real routes here, e.g.:
-// import authRoutes from "./routes/auth.route.js";
+// Use a single canonical API namespace on Vercel and local.
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
