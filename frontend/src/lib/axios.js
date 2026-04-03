@@ -1,6 +1,6 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-    baseURL : "http://localhost:8000/api",
+    baseURL : "https://speak-zen-api.vercel.app/api",
     withCredentials : true
 })
