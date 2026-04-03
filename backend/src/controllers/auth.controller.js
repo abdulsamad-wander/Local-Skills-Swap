@@ -61,7 +61,7 @@ export async function signup(req, res) {
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true, // prevent XSS attacks,
-      sameSite: "strict", // prevent CSRF attacks
+      // sameSite: "strict", // prevent CSRF attacks
       secure: process.env.NODE_ENV === "production",
     });
 
@@ -111,11 +111,15 @@ export function logout(req, res) {
   res.status(200).json({ success: true, message: "Logout successful" });
 }
 
+export function getUser(req, res) {
+  res.status(200).json({ success: true, user: req.user });
+};
+
 export async function onboard(req, res) {
   try {
     const userId = req.user._id;
 
-    const {  bio, nativeLanguage, learningLanguage, location } =
+    const { bio, nativeLanguage, learningLanguage, location } =
       req.body;
 
     if (
