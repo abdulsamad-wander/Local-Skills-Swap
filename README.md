@@ -2,7 +2,7 @@
 
 ## 🚀 Overview
 
-This is a full-stack real-time language learning platform built using the MERN Stack, Socket.IO, and Stream.  
+This is a full-stack real-time language learning platform built using the MERN Stack and Stream.  
 The platform allows users to connect with people around the world based on the languages they know and the languages they want to learn.
 
 Users can:
@@ -68,7 +68,7 @@ Users can:
 
 - One-to-One Real-Time Messaging
 - Instant Message Delivery
-- Real-Time Communication using Socket.IO
+- Real-Time Communication using StreamJs
 - No Page Reload Required
 
 ---
@@ -115,7 +115,7 @@ Users can send and receive:
 ## Frontend
 - React.js
 - Tailwind CSS
-- Socket.IO Client
+- StreamJs Client
 - Axios
 
 ---
@@ -123,7 +123,7 @@ Users can send and receive:
 ## Backend
 - Node.js
 - Express.js
-- Socket.IO
+- StreamJs
 
 ---
 
@@ -133,7 +133,6 @@ Users can send and receive:
 ---
 
 ## Real-Time Communication & Video
-- Socket.IO
 - Stream Video SDK
 
 ---
@@ -226,7 +225,6 @@ server/
 ├── models/
 ├── routes/
 ├── middleware/
-├── socket/
 ├── utils/
 └── server.js
 ```
