@@ -1,319 +1,178 @@
-# 🌍 Real-Time Language Learning Platform (MERN + Stream)
+# SpeakZen — Social Language Exchange Platform
 
-## 🚀 Overview
+A full-stack real-time social platform for language learners built with MERN + Stream Chat & Video.
 
-This is a full-stack real-time language learning platform built using the MERN Stack and Stream.  
-The platform allows users to connect with people around the world based on the languages they know and the languages they want to learn.
-
-Users can:
-- Create accounts
-- Complete their profiles
-- Add native & learning languages
-- Find language partners
-- Send/Accept friend requests
-- Chat in real-time
-- Make video calls
-- Share screens during calls
-- Share media files
-- Customize UI theme (32 different themes)
-- See online/offline status in real-time
-
-The application provides a modern, responsive, and interactive user experience focused on communication and collaborative language learning.
+Connect with people worldwide, practice languages through chat and calls, and build your language learning network in a modern social-media experience.
 
 ---
 
-# ✨ Features
+## ✨ Features
 
-## 🔐 Authentication & Authorization
-- User Signup & Login
-- Secure Authentication
-- Protected Routes
-- Session Handling
+### 🔐 Auth & Profiles
+- Signup / Login with JWT sessions
+- Upload profile picture (stored in database, no external API)
+- Edit bio, native language, and learning language
+- Settings page with UI theme selection (32 themes)
 
----
+### 🤝 Social & Discovery
+- Discover language partners matched by native/learning language
+- Send, accept, and reject friend requests
+- Real-time notification badge that persists across page refreshes
+- Block / Unblock users — frozen conversation on both sides, restores on unblock
 
-# 👤 User Profile System
+### 💬 Chat
+- One-to-one real-time messaging (Stream Chat)
+- Group chats up to 100 members with group icon and name
+- Voice notes (in-chat audio recording)
+- Photo, video, and file sharing
+- Message reactions and replies
+- Pin and mute conversations
+- Search across chats
+- Back button navigation in chat
 
-Users can:
-- Upload Profile Picture
-- Add Bio/About Section
-- Add Native Language
-- Add Learning Language
-- Edit Personal Information
-- Manage Account Details
+### 📞 Calls
+- One-to-one video calls (Stream Video)
+- One-to-one voice calls
+- In-call controls (mute, camera, end)
 
----
+### 👥 Groups
+- Create groups with a custom icon image
+- Add/remove members (server-enforced 100-member cap)
+- Edit group name and icon after creation
+- Group info panel
 
-# 🌐 Language Partner Matching
+### 🟢 Presence
+- Real-time online/offline status
+- Last seen indicator
+- Status visible on friend cards, chat headers, and conversation list
 
-Users can:
-- Search members based on language preferences
-- Find users who:
-  - Know the language they want to learn
-  - Want to learn the user's native language
-- Connect with suitable language exchange partners
-
----
-
-# 🤝 Friend Request System
-
-- Send Friend Requests
-- Accept/Reject Requests
-- View Friend List
-- Real-Time Request Updates
-
----
-
-# 💬 Real-Time Chat System
-
-- One-to-One Real-Time Messaging
-- Instant Message Delivery
-- Real-Time Communication using StreamJs
-- No Page Reload Required
+### 🎨 Themes
+- 32 daisyUI themes across the whole app
+- Chat page background and message bubbles follow the active theme
+- Theme persists across sessions
 
 ---
 
-# 📁 Media Sharing
+## 🛠️ Tech Stack
 
-Users can send and receive:
-- Text Messages
-- Images
-- Videos
-- Files
-
----
-
-# 📹 Video Calling Features
-
-- One-to-One Video Calling
-- Real-Time Audio & Video Communication
-- Screen Sharing Support
-- Call Controls
-- Stream Integration
+| Layer | Tech |
+|---|---|
+| Frontend | React 19, Vite 7, Tailwind CSS 3, daisyUI 4, Zustand, TanStack Query 5 |
+| Real-time Chat | Stream Chat (`stream-chat`, `stream-chat-react`) |
+| Real-time Video/Voice | Stream Video (`@stream-io/video-react-sdk`) |
+| Backend | Node.js, Express 4 |
+| Database | MongoDB Atlas + Mongoose 8 |
+| Auth | JWT + HTTP-only cookies |
+| Deployment | Vercel (backend as serverless, frontend as static) |
 
 ---
 
-# 🟢 Live Online Status
+## ⚙️ Local Setup
 
-- Real-Time Online/Offline Status
-- Active User Tracking
-- Instant Presence Updates
-
----
-
-# 🎨 Theme Customization
-
-- Users can choose from **32 different UI themes**
-- Personalized user experience
-- Persistent theme selection across sessions
-- Dynamic UI styling without reload
-
----
-
-# 🛠️ Tech Stack
-
-## Frontend
-- React.js
-- Tailwind CSS
-- StreamJs Client
-- Axios
-
----
-
-## Backend
-- Node.js
-- Express.js
-- StreamJs
-
----
-
-## Database
-- MongoDB
-
----
-
-## Real-Time Communication & Video
-- Stream Video SDK
-
----
-
-# ⚙️ How It Works
-
-## 📝 User Registration
-Users create an account and provide:
-- Native Language
-- Language They Want to Learn
-- Profile Information
-
----
-
-## 🔍 Find Language Partners
-The system helps users discover members with matching language interests.
-
----
-
-## 🤝 Send & Accept Requests
-Users can:
-- Send Friend Requests
-- Accept or Reject Requests
-- Build their language learning network
-
----
-
-## 💬 Real-Time Communication
-After becoming friends, users can:
-- Start Real-Time Chats
-- Share Media Files
-- Exchange Learning Resources
-
----
-
-## 📹 Video Calling & Screen Sharing
-Users can:
-- Start Video Calls
-- Share Screens During Calls
-- Practice Languages Face-to-Face
-
----
-
-## 🎨 Theme Selection
-Users can:
-- Choose from 32 prebuilt themes
-- Switch UI appearance instantly
-- Enjoy a personalized experience
-
----
-
-# 📸 Screenshots
-
-## 🔑 Authentication Page
-_Add your screenshot here_//later
-
----
-
-## 💬 Chat Interface
-_Add your screenshot here_//later
-
----
-
-## 📹 Video Calling
-_Add your screenshot here_//later
-
----
-
-## 👤 Profile Page
-_Add your screenshot here_//later
-
----
-
-# 📂 Project Structure
+### 1. Clone
 
 ```bash
-client/
-│
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── hooks/
-│   ├── context/
-│   ├── utils/
-│   └── App.js
-│
-server/
-│
-├── controllers/
-├── models/
-├── routes/
-├── middleware/
-├── utils/
-└── server.js
+git clone https://github.com/YOUR_USERNAME/speakzen.git
+cd speakzen
 ```
 
----
-
-# ⚡ Installation & Setup
-
-## 1️⃣ Clone Repository
+### 2. Backend
 
 ```bash
-git clone <your-repository-link>
-```
-
----
-
-## 2️⃣ Install Dependencies
-
-### Frontend
-
-```bash
-cd client
+cd backend
 npm install
 ```
 
-### Backend
-
-```bash
-cd server
-npm install
-```
-
----
-
-## 3️⃣ Setup Environment Variables
-
-Create `.env` file in backend:
+Create `backend/.env`:
 
 ```env
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_secret_key
-STREAM_API_KEY=your_stream_key
-STREAM_SECRET=your_stream_secret
+PORT=8000
+MONGO_URI=mongodb+srv://<user>:<pass>@<cluster>/<db>
+JWT_SECRET_KEY=your-long-random-secret
+STREAM_API_KEY=your-stream-api-key
+STREAM_API_SECRET=your-stream-api-secret
+CORS_ORIGIN=http://localhost:5173
 ```
-
----
-
-## 4️⃣ Run Application
-
-### Backend
 
 ```bash
-npm run server
+npm run dev
 ```
 
-### Frontend
+### 3. Frontend
 
 ```bash
-npm start
+cd frontend
+npm install
+```
+
+Create `frontend/.env`:
+
+```env
+VITE_STREAM_API_KEY=your-stream-api-key
+VITE_DEV_API_BASE_URL=http://localhost:8000/api
+VITE_API_BASE_URL=https://your-backend.vercel.app/api
+```
+
+```bash
+npm run dev
+```
+
+App runs at `http://localhost:5173`.
+
+---
+
+## 🚀 Deployment (Vercel)
+
+Both backend and frontend deploy as separate Vercel projects from the same repo.
+
+**Backend** — Root Directory: `backend`
+- Framework: Other
+- Env vars: `MONGO_URI`, `JWT_SECRET_KEY`, `STREAM_API_KEY`, `STREAM_API_SECRET`, `CORS_ORIGIN` (set to frontend URL)
+
+**Frontend** — Root Directory: `frontend`
+- Framework: Vite
+- Env vars: `VITE_STREAM_API_KEY`, `VITE_API_BASE_URL` (set to backend Vercel URL + `/api`)
+
+MongoDB Atlas: add `0.0.0.0/0` to Network Access so Vercel's dynamic IPs can connect.
+
+---
+
+## 📂 Project Structure
+
+```
+speakzen/
+├── backend/
+│   ├── src/
+│   │   ├── api/index.js        # Express app + Vercel entry
+│   │   ├── controllers/        # auth, user, chat
+│   │   ├── lib/                # db, stream, profile helpers
+│   │   ├── middleware/         # protectRoute
+│   │   ├── models/             # User, FriendRequest, GroupImage
+│   │   └── routes/             # auth, user, chat
+│   ├── vercel.json
+│   └── package.json
+│
+└── frontend/
+    ├── src/
+    │   ├── components/         # Sidebar, Navbar, Avatar, CallButton, etc.
+    │   ├── context/            # ChatProvider, ChatContext
+    │   ├── hooks/              # useBlockStatus, useThemeStore, etc.
+    │   ├── lib/                # axios, api helpers
+    │   └── page/               # Home, ChatPage, Chats, Profile, Settings, etc.
+    ├── public/                 # logo.svg, favicon.svg
+    ├── vercel.json
+    └── package.json
 ```
 
 ---
 
-# 🚀 Future Improvements
+## 👨‍💻 Author
 
-- Group Video Calls
-- Voice Messages
-- Translation Support
-- AI-Based Matching
-- Message Reactions
-- Push Notifications
-- Chat Search
-- Dark Mode Enhancements
-- Global Language Community Rooms
+**Abdul Rehman**  
+Founder, [The Digital Marketing (TDM)](https://thedigitalmarketing.services)
+
+MERN Stack · Real-Time Systems · Full-Stack Product Development
 
 ---
 
-# 👨‍💻 Author
-
-## Abdul Samad
-
-Software Engineer | MERN Stack Developer | DSA Enthusiast
-
-- 500+ LeetCode Problems Solved
-- Full-Stack MERN Developer
-- Passionate About Real-Time Systems & Scalable Applications
-
----
-
-# ⭐ Support
-
-If you like this project, consider giving it a ⭐ on GitHub!
+⭐ Star this repo if you found it useful!
