@@ -203,3 +203,19 @@ export const LANGUAGE_TO_FLAG = {
   bengali: "bd",
   persian: "ir",
 };
+// daisyUI themes that render on a dark base; used to pick Stream chat's base skin
+export const DARK_THEMES = new Set([
+  "dark",
+  "synthwave",
+  "halloween",
+  "forest",
+  "aqua",
+  "black",
+  "luxury",
+  "dracula",
+  "business",
+  "night",
+  "coffee",
+  "dim",
+  "sunset",
+]);

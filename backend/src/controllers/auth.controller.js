@@ -1,4 +1,5 @@
 import { upsertStreamUser } from "../lib/stream.js";
+import { applyProfileUpdate, syncStreamUser } from "../lib/profile.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
@@ -45,14 +46,11 @@ export async function signup(req, res) {
         .json({ message: "Email already exists, please use a different one" });
     }
 
-    const idx = Math.floor(Math.random() * 70) + 1; // generate a num between 1-70
-    const randomAvatar = `https://i.pravatar.cc/300?img=${idx}`;
-
     const newUser = await User.create({
       email,
       fullName,
       password,
-      profilePic: randomAvatar,
+      profilePic: "",
     });
 
     try {
@@ -130,61 +128,34 @@ export function getUser(req, res) {
 export async function onboard(req, res) {
   try {
     const userId = req.user._id;
+    const { bio, nativeLanguage, learningLanguage, location } = req.body;
 
-    const { bio, nativeLanguage, learningLanguage, location, profilePic } =
-      req.body;
+    const missingFields = [
+      !bio && "bio",
+      !nativeLanguage && "nativeLanguage",
+      !learningLanguage && "learningLanguage",
+      !location && "location",
+    ].filter(Boolean);
 
-    if (
-      !bio ||
-      !nativeLanguage ||
-      !learningLanguage ||
-      !location
-    ) {
-      return res.status(400).json({
-        message: "All fields are required",
-        missingFields: [
-          !bio && "bio",
-          !nativeLanguage && "nativeLanguage",
-          !learningLanguage && "learningLanguage",
-          !location && "location",
-        ].filter(Boolean),
-      });
+    if (missingFields.length) {
+      return res.status(400).json({ message: "All fields are required", missingFields });
     }
+
+    const update = await applyProfileUpdate(req, userId, req.body);
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      {
-        bio,
-        nativeLanguage,
-        learningLanguage,
-        location,
-        ...(profilePic ? { profilePic } : {}),
-        isOnboarded: true,
-      },
+      { ...update, isOnboarded: true },
       { new: true, runValidators: true }
     ).select("-password");
 
-    if (!updatedUser)
-      return res.status(404).json({ message: "User not found" });
+    if (!updatedUser) return res.status(404).json({ message: "User not found" });
 
-    try {
-      await upsertStreamUser({
-        id: updatedUser._id.toString(),
-        name: updatedUser.fullName,
-        image: updatedUser.profilePic || "",
-      });
-      console.log(
-        `Stream user updated after onboarding for ${updatedUser.fullName}`
-      );
-    } catch (streamError) {
-      console.log(
-        "Error updating Stream user during onboarding:",
-        streamError.message
-      );
-    }
+    await syncStreamUser(updatedUser);
 
     res.status(200).json({ success: true, user: updatedUser });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ message: error.message });
     console.error("Onboarding error:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }

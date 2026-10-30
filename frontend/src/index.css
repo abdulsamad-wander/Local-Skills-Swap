@@ -41,16 +41,52 @@
   }
 }
 
-/* Stream chat: let it fill the content area and follow the theme */
+/* Stream chat: fill the content area and follow the app theme */
 .str-chat {
   --str-chat__font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --str-chat__border-radius-circle: 9999px;
   height: 100%;
 }
 .str-chat__channel,
-.str-chat__container {
+.str-chat__container,
+.str-chat__main-panel {
   height: 100%;
 }
 .str-chat__list-notifications {
   display: none;
+}
+
+/*
+ * "Match app theme" mode. Stream derives every surface from this small base
+ * palette, so remapping it onto the daisyUI theme tokens makes the whole chat
+ * (message list, header, composer, bubbles, thread) follow the chosen theme.
+ */
+.str-chat.str-chat--app-theme {
+  --str-chat__background-color: oklch(var(--b1) / 1);
+  --str-chat__secondary-background-color: oklch(var(--b2) / 1);
+
+  --str-chat__surface-color: oklch(var(--bc) / 0.14);
+  --str-chat__secondary-surface-color: oklch(var(--b3) / 1);
+  --str-chat__tertiary-surface-color: oklch(var(--b2) / 1);
+
+  --str-chat__primary-color: oklch(var(--p) / 1);
+  --str-chat__active-primary-color: oklch(var(--p) / 1);
+  --str-chat__primary-color-low-emphasis: oklch(var(--p) / 0.3);
+  --str-chat__primary-overlay-color: oklch(var(--p) / 0.6);
+  --str-chat__on-primary-color: oklch(var(--pc) / 1);
+  --str-chat__primary-surface-color: oklch(var(--p) / 0.22);
+  --str-chat__primary-surface-color-low-emphasis: oklch(var(--p) / 0.1);
+
+  --str-chat__text-color: oklch(var(--bc) / 1);
+  --str-chat__text-low-emphasis-color: oklch(var(--bc) / 0.6);
+  --str-chat__disabled-color: oklch(var(--bc) / 0.35);
+  --str-chat__on-disabled-color: oklch(var(--bc) / 1);
+
+  --str-chat__avatar-background-color: oklch(var(--b3) / 1);
+  --str-chat__box-shadow-color: oklch(var(--bc) / 0.15);
+  --str-chat__overlay-color: oklch(var(--n) / 0.7);
+  --str-chat__secondary-overlay-color: oklch(var(--n) / 0.45);
+  --str-chat__secondary-overlay-text-color: oklch(var(--nc) / 1);
+  --str-chat__opaque-surface-background-color: oklch(var(--b2) / 0.92);
+  --str-chat__opaque-surface-text-color: oklch(var(--bc) / 1);
 }

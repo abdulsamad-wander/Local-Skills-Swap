@@ -5,7 +5,7 @@ const sizes = {
   xl: "size-24",
 };
 
-const UserAvatar = ({ src, name = "", size = "md", online = false, className = "" }) => {
+const UserAvatar = ({ src, name = "", size = "md", online = false, unread = 0, className = "" }) => {
   const initials = name
     .split(" ")
     .filter(Boolean)
@@ -23,12 +23,17 @@ const UserAvatar = ({ src, name = "", size = "md", online = false, className = "
           className="size-full rounded-full object-cover bg-base-300"
         />
       ) : (
-        <div className="size-full rounded-full bg-primary/15 text-primary grid place-items-center font-bold">
+        <div className="size-full rounded-full bg-base-300 text-base-content/80 grid place-items-center font-bold select-none">
           {initials || "?"}
         </div>
       )}
       {online && (
         <span className="absolute bottom-0 right-0 size-3 rounded-full bg-success ring-2 ring-base-200" />
+      )}
+      {unread > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1.5 rounded-full bg-secondary text-secondary-content text-[11px] font-bold grid place-items-center ring-2 ring-base-200">
+          {unread > 9 ? "9+" : unread}
+        </span>
       )}
     </div>
   );

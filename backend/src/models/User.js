@@ -41,6 +41,16 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // uploaded avatar, served by GET /api/users/:id/avatar (never returned in user JSON)
+    avatar: {
+      data: { type: Buffer, select: false },
+      contentType: { type: String, select: false },
+    },
+    // last time the user opened the notifications page; drives the unread badge
+    notificationsSeenAt: {
+      type: Date,
+      default: () => new Date(0),
+    },
     friends: [
       {
         type: mongoose.Schema.Types.ObjectId,

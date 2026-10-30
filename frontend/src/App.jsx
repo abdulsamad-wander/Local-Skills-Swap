@@ -12,6 +12,8 @@ import useAuthUser from "./hooks/useAuthUser.js";
 import Layout from "./components/Layout.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
 import Friends from "./page/Friends.jsx";
+import Settings from "./page/Settings.jsx";
+import ChatProvider from "./context/ChatProvider.jsx";
 
 function App() {
   const { isLoading, authUser } = useAuthUser();
@@ -24,6 +26,7 @@ function App() {
 
   return (
     <div className="min-h-screen" data-theme={theme}>
+      <ChatProvider>
       <Routes>
         <Route
           path="/"
@@ -106,6 +109,18 @@ function App() {
           }
         />
         <Route
+          path="/settings"
+          element={
+            isAuthenticated && isOnBoarded ? (
+              <Layout showSidebar={true} title="Settings">
+                <Settings />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
           path="/notifications"
           element={
             isAuthenticated && isOnBoarded ? (
@@ -118,7 +133,8 @@ function App() {
           }
         />
       </Routes>
-      <Toaster />
+      </ChatProvider>
+      <Toaster position="top-center" toastOptions={{ className: "font-semibold" }} />
     </div>
   );
 }

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { IoShuffleOutline, IoLocationOutline } from "react-icons/io5";
+import { IoLocationOutline } from "react-icons/io5";
 import useAuthUser from "../hooks/useAuthUser";
 import { onBordingFn } from "../lib/api";
 import { LANGUAGES } from "../constants/index.js";
 import { useThemeStore } from "../store/useThemeStore";
 import Logo from "../components/Logo";
-import UserAvatar from "../components/UserAvatar";
+import AvatarUpload from "../components/AvatarUpload";
 import LanguagePair from "../components/LanguagePair";
 
 const OnBoarding = () => {
@@ -39,11 +39,6 @@ const OnBoarding = () => {
     onBoardingMutation(form);
   };
 
-  const handleRandomAvatar = () => {
-    const idx = Math.floor(Math.random() * 70) + 1;
-    setForm({ ...form, profilePic: `https://i.pravatar.cc/300?img=${idx}` });
-  };
-
   const field = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   return (
@@ -54,18 +49,17 @@ const OnBoarding = () => {
         <p className="text-base-content/60 mt-1">This is what partners see before they say hi.</p>
 
         <form onSubmit={handleSubmit} className="mt-8 grid gap-6 sm:grid-cols-[auto,1fr]">
-          {/* live preview card */}
           <div className="person-card sm:w-56 h-fit items-center text-center">
-            <UserAvatar src={form.profilePic} name={authUser?.fullName} size="xl" />
+            <AvatarUpload
+              value={form.profilePic}
+              name={authUser?.fullName}
+              onChange={(profilePic) => setForm((f) => ({ ...f, profilePic }))}
+            />
             <div>
               <p className="font-extrabold">{authUser?.fullName}</p>
               <p className="text-xs text-base-content/60">{form.location || "Your city"}</p>
             </div>
             <LanguagePair native={form.nativeLanguage} learning={form.learningLanguage} compact />
-            <button type="button" onClick={handleRandomAvatar} className="btn btn-sm btn-outline rounded-full gap-2">
-              <IoShuffleOutline className="size-4" />
-              New avatar
-            </button>
           </div>
 
           <div className="space-y-5">

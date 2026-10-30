@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
+import { applyProfileUpdate, syncStreamUser } from "../lib/profile.js";
 
 export async function getRecommendedUsers(req, res) {
   try {
@@ -145,6 +146,57 @@ export async function getOutgoingFriendReqs(req, res) {
     res.status(200).json(outgoingRequests);
   } catch (error) {
     console.log("Error in getOutgoingFriendReqs controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function updateProfile(req, res) {
+  try {
+    const update = await applyProfileUpdate(req, req.user._id, req.body);
+
+    const user = await User.findByIdAndUpdate(req.user._id, update, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await syncStreamUser(user);
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    if (error.status) return res.status(error.status).json({ message: error.message });
+    console.error("Error in updateProfile controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+/** Public: serves an uploaded avatar. */
+export async function getAvatar(req, res) {
+  try {
+    const user = await User.findById(req.params.id).select("+avatar.data +avatar.contentType");
+    if (!user || !user.avatar?.data) return res.status(404).end();
+
+    res.set("Content-Type", user.avatar.contentType || "image/jpeg");
+    res.set("Cache-Control", "public, max-age=31536000, immutable");
+    res.send(user.avatar.data);
+  } catch (error) {
+    console.error("Error in getAvatar controller", error.message);
+    res.status(500).end();
+  }
+}
+
+export async function markNotificationsSeen(req, res) {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { notificationsSeenAt: new Date() },
+      { new: true }
+    ).select("notificationsSeenAt");
+
+    res.status(200).json({ notificationsSeenAt: user.notificationsSeenAt });
+  } catch (error) {
+    console.error("Error in markNotificationsSeen controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

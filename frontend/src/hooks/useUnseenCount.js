@@ -1,20 +1,26 @@
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getFriendReq } from "../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getFriendReq, markNotificationsSeen } from "../lib/api";
+import useAuthUser from "./useAuthUser";
 
-/** Unseen notification count shared by the sidebar and the mobile tab bar. */
+/**
+ * Friend-request notifications that arrived after the user last opened the
+ * notifications page. The "seen" timestamp lives on the server, so the badge
+ * stays cleared after a refresh.
+ */
 export const useUnseenCount = () => {
-  const { pathname } = useLocation();
-  const [lastViewed, setLastViewed] = useState(0);
+  const queryClient = useQueryClient();
+  const { authUser } = useAuthUser();
   const { data } = useQuery({ queryKey: ["friendReqs"], queryFn: getFriendReq });
-  const total = (data?.incomingReqs?.length || 0) + (data?.acceptedReqs?.length || 0);
 
-  const onNotifications = pathname === "/notifications";
-  if (onNotifications && lastViewed !== total) setLastViewed(total);
+  const seenAt = authUser?.notificationsSeenAt ? new Date(authUser.notificationsSeenAt) : new Date(0);
 
-  return {
-    unseen: onNotifications ? 0 : Math.max(0, total - lastViewed),
-    markSeen: () => setLastViewed(total),
-  };
+  const items = [...(data?.incomingReqs || []), ...(data?.acceptedReqs || [])];
+  const unseen = items.filter((i) => new Date(i.updatedAt || i.createdAt || 0) > seenAt).length;
+
+  const { mutate: markSeen } = useMutation({
+    mutationFn: markNotificationsSeen,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+  });
+
+  return { unseen, markSeen };
 };

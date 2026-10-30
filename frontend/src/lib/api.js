@@ -5,8 +5,7 @@ export const getAuthUser = async () => {
   try {
     const res = await axiosInstance.get("/auth/me");
     return res.data;
-  } catch (error) {
-    console.log("Error in authentication", error);
+  } catch {
     return null;
   }
 };
@@ -25,12 +24,19 @@ export const logout = async () => {
   const response = await axiosInstance.post("/auth/logout");
   return response.data;
 };
+
 export const onBordingFn = async (userData) => {
   const response = await axiosInstance.post("/auth/onboarding", userData);
   return response.data;
 };
 
-//for getting friends we have so far 
+//update name, bio, languages, location or profile picture
+export const updateProfile = async (userData) => {
+  const response = await axiosInstance.put("/users/me", userData);
+  return response.data;
+};
+
+//for getting friends we have so far
 export const getFriends = async () => {
   const response = await axiosInstance.get("/users/friends");
   return response.data;
@@ -42,7 +48,7 @@ export const getRecommendedUsers = async () => {
   return response.data;
 };
 
-//Friend Requests that we have sent 
+//Friend Requests that we have sent
 export const getOutgoingFriendReqs = async () => {
   const response = await axiosInstance.get("/users/outgoing-friend-requests");
   return response.data;
@@ -53,17 +59,26 @@ export const getSendRequests = async (userId) => {
   const response = await axiosInstance.post(`/users/friend-request/${userId}`);
   return response.data;
 };
+
 //for notifications get Friend Requests
 export const getFriendReq = async () => {
   const response = await axiosInstance.get(`/users/friend-requests`);
   return response.data;
 };
+
 //accept Friend requests
-export const acceptFriendReqs = async (requestId)=>{
+export const acceptFriendReqs = async (requestId) => {
   const response = await axiosInstance.put(`/users/friend-request/${requestId}/accept`);
   return response.data;
-}
-export const getStreamToken = async ()=>{
+};
+
+//remember that the user has opened the notifications page
+export const markNotificationsSeen = async () => {
+  const response = await axiosInstance.put("/users/notifications/seen");
+  return response.data;
+};
+
+export const getStreamToken = async () => {
   const response = await axiosInstance.get("/chat/token");
   return response.data;
-}
+};

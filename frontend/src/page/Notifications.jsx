@@ -1,7 +1,10 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
-import { acceptFriendReqs, getFriendReq } from "../lib/api";
+import { acceptFriendReqs, getFriendReq, getFriends } from "../lib/api";
+import { useChat } from "../context/ChatContext";
+import { useUnseenCount } from "../hooks/useUnseenCount";
 import NoNotificationFound from "../components/NoNotificationFound";
 import UserAvatar from "../components/UserAvatar";
 import LanguagePair from "../components/LanguagePair";
@@ -10,6 +13,20 @@ const Notifications = () => {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({ queryKey: ["friendReqs"], queryFn: getFriendReq });
+
+  const { data: friends = [] } = useQuery({ queryKey: ["friends"], queryFn: getFriends });
+  const { unreadByUser } = useChat();
+  const { markSeen } = useUnseenCount();
+
+  // opening this page clears the friend-request badge for good
+  useEffect(() => {
+    markSeen();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const unreadFriends = friends
+    .map((f) => ({ ...f, unread: unreadByUser[f._id] || 0 }))
+    .filter((f) => f.unread > 0);
 
   const { mutate: accept, isPending, variables: acceptingId } = useMutation({
     mutationFn: acceptFriendReqs,
@@ -30,10 +47,32 @@ const Notifications = () => {
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => <div key={i} className="skeleton h-20 rounded-3xl" />)}
         </div>
-      ) : incoming.length === 0 && accepted.length === 0 ? (
+      ) : incoming.length === 0 && accepted.length === 0 && unreadFriends.length === 0 ? (
         <NoNotificationFound />
       ) : (
         <>
+          {unreadFriends.length > 0 && (
+            <section className="space-y-3">
+              <h3 className="font-bold text-base-content/70">Messages</h3>
+              {unreadFriends.map((f) => (
+                <Link
+                  key={f._id}
+                  to={`/chat/${f._id}`}
+                  className="rounded-3xl bg-base-200 p-4 flex items-center gap-4 hover:bg-base-300/60 transition-colors"
+                >
+                  <UserAvatar src={f.profilePic} name={f.fullName} size="md" unread={f.unread} />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-extrabold truncate">{f.fullName}</p>
+                    <p className="text-sm text-base-content/70">
+                      {f.unread === 1 ? "Sent you a message" : `Sent you ${f.unread} messages`}
+                    </p>
+                  </div>
+                  <IoChatbubbleEllipsesOutline className="size-5 text-base-content/50" />
+                </Link>
+              ))}
+            </section>
+          )}
+
           {incoming.length > 0 && (
             <section className="space-y-3">
               <h3 className="font-bold text-base-content/70">

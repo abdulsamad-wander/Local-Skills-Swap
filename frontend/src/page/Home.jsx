@@ -5,9 +5,11 @@ import { IoLocationOutline, IoPersonAddOutline, IoCheckmarkCircle, IoMailUnreadO
 import { getFriends, getFriendReq, getOutgoingFriendReqs, getRecommendedUsers, getSendRequests } from "../lib/api";
 import UserAvatar from "../components/UserAvatar";
 import LanguagePair from "../components/LanguagePair";
+import { useChat } from "../context/ChatContext";
 
 const Home = () => {
   const queryClient = useQueryClient();
+  const { unreadByUser } = useChat();
 
   const { data: friends = [], isLoading: loadingFriends } = useQuery({ queryKey: ["friends"], queryFn: getFriends });
   const { data: people = [], isLoading: loadingUsers } = useQuery({ queryKey: ["users"], queryFn: getRecommendedUsers });
@@ -61,8 +63,15 @@ const Home = () => {
             {friends.map((f) => (
               <li key={f._id} className="shrink-0 w-[4.5rem] text-center">
                 <Link to={`/chat/${f._id}`} className="block group">
-                  <span className="block rounded-full p-[3px] bg-gradient-to-tr from-primary to-secondary group-hover:scale-105 transition-transform">
-                    <UserAvatar src={f.profilePic} name={f.fullName} size="lg" className="ring-2 ring-base-100" />
+                  <span className="relative block">
+                    <span className="block rounded-full p-[3px] bg-gradient-to-tr from-primary to-secondary group-hover:scale-105 transition-transform">
+                      <UserAvatar src={f.profilePic} name={f.fullName} size="lg" className="ring-2 ring-base-100" />
+                    </span>
+                    {(unreadByUser[f._id] || 0) > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1.5 rounded-full bg-secondary text-secondary-content text-[11px] font-bold grid place-items-center ring-2 ring-base-100">
+                        {unreadByUser[f._id] > 9 ? "9+" : unreadByUser[f._id]}
+                      </span>
+                    )}
                   </span>
                   <span className="block mt-1.5 text-xs font-semibold truncate">{f.fullName.split(" ")[0]}</span>
                 </Link>
