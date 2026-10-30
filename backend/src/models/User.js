@@ -57,6 +57,14 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    // people this user blocked: no messages, no requests, hidden from discovery
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        index: true,
+      },
+    ],
   },
   { timestamps: true }
 );

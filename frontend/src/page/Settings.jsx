@@ -1,25 +1,18 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { IoLocationOutline, IoCheckmark } from "react-icons/io5";
+import { IoLocationOutline, IoBan } from "react-icons/io5";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
-import { updateProfile } from "../lib/api";
+import { getBlockedUsers, unblockUser, updateProfile } from "../lib/api";
 import { LANGUAGES } from "../constants";
-import { useThemeStore } from "../store/useThemeStore";
 import AvatarUpload from "../components/AvatarUpload";
-
-const CHAT_THEMES = [
-  { value: "match", label: "Match app theme", hint: "Follows your app theme" },
-  { value: "light", label: "Always light", hint: "White background, dark text" },
-  { value: "dark", label: "Always dark", hint: "Dark background, light text" },
-];
+import UserAvatar from "../components/UserAvatar";
 
 const Settings = () => {
   const { authUser } = useAuthUser();
   const queryClient = useQueryClient();
   const { logoutMutation } = useLogout();
-  const { chatTheme, setChatTheme } = useThemeStore();
 
   const [form, setForm] = useState({
     fullName: authUser?.fullName || "",
@@ -28,6 +21,18 @@ const Settings = () => {
     learningLanguage: authUser?.learningLanguage || "",
     location: authUser?.location || "",
     profilePic: authUser?.profilePic || "",
+  });
+
+  const { data: blocked = [] } = useQuery({ queryKey: ["blocked"], queryFn: getBlockedUsers });
+
+  const { mutate: unblock } = useMutation({
+    mutationFn: unblockUser,
+    onSuccess: () => {
+      toast.success("Unblocked");
+      queryClient.invalidateQueries({ queryKey: ["blocked"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: () => toast.error("Could not unblock. Please try again."),
   });
 
   const { mutate: save, isPending } = useMutation({
@@ -51,6 +56,11 @@ const Settings = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-10">
+      <header>
+        <h2 className="text-2xl font-extrabold tracking-tight">Settings</h2>
+        <p className="text-base-content/60 mt-1">Your profile and how the app looks.</p>
+      </header>
+
       {/* PROFILE */}
       <section className="rounded-3xl bg-base-200 p-5 sm:p-6">
         <h3 className="font-extrabold text-lg">Profile</h3>
@@ -129,40 +139,34 @@ const Settings = () => {
         </form>
       </section>
 
-      {/* APPEARANCE */}
+      {/* BLOCKED */}
       <section className="rounded-3xl bg-base-200 p-5 sm:p-6">
-        <h3 className="font-extrabold text-lg">Appearance</h3>
-        <p className="text-sm text-base-content/60 mt-0.5">Applies on this device.</p>
+        <h3 className="font-extrabold text-lg">Blocked people</h3>
+        <p className="text-sm text-base-content/60 mt-0.5">
+          They cannot message you or send you a request, and you will not see each other in Discover.
+        </p>
 
-        <h4 className="font-bold text-sm mt-5 mb-2">Chat background</h4>
-        <div className="grid sm:grid-cols-3 gap-3">
-          {CHAT_THEMES.map((c) => (
-            <button
-              key={c.value}
-              type="button"
-              onClick={() => setChatTheme(c.value)}
-              className={`flex items-center gap-3 rounded-2xl bg-base-100 p-4 text-left ring-2 ${
-                chatTheme === c.value ? "ring-primary" : "ring-transparent hover:ring-base-300"
-              }`}
-            >
-              <span
-                className={`grid place-items-center size-10 rounded-xl shrink-0 ${
-                  c.value === "dark"
-                    ? "bg-neutral text-neutral-content"
-                    : c.value === "light"
-                      ? "bg-white text-neutral"
-                      : "bg-base-200 text-base-content"
-                }`}
-              >
-                {chatTheme === c.value ? <IoCheckmark className="size-5" /> : <span className="text-xs font-bold">Aa</span>}
-              </span>
-              <span>
-                <span className="block font-bold">{c.label}</span>
-                <span className="block text-xs text-base-content/60">{c.hint}</span>
-              </span>
-            </button>
-          ))}
-        </div>
+        {blocked.length === 0 ? (
+          <div className="flex items-center gap-3 mt-4 text-base-content/60">
+            <IoBan className="size-5" />
+            <p className="text-sm">You have not blocked anyone.</p>
+          </div>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {blocked.map((u) => (
+              <li key={u._id} className="flex items-center gap-3 rounded-2xl bg-base-100 p-3">
+                <UserAvatar src={u.profilePic} name={u.fullName} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm truncate">{u.fullName}</p>
+                  {u.location && <p className="text-xs text-base-content/60 truncate">{u.location}</p>}
+                </div>
+                <button onClick={() => unblock(u._id)} className="btn btn-ghost btn-sm rounded-full">
+                  Unblock
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* ACCOUNT */}

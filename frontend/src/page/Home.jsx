@@ -1,15 +1,24 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { IoLocationOutline, IoPersonAddOutline, IoCheckmarkCircle, IoMailUnreadOutline } from "react-icons/io5";
+import {
+  IoLocationOutline,
+  IoPersonAddOutline,
+  IoCheckmarkCircle,
+  IoMailUnreadOutline,
+  IoBan,
+  IoEllipsisHorizontal,
+} from "react-icons/io5";
 import { getFriends, getFriendReq, getOutgoingFriendReqs, getRecommendedUsers, getSendRequests } from "../lib/api";
 import UserAvatar from "../components/UserAvatar";
 import LanguagePair from "../components/LanguagePair";
 import { useChat } from "../context/ChatContext";
+import { useBlockStatus } from "../hooks/useBlockStatus";
 
 const Home = () => {
   const queryClient = useQueryClient();
   const { unreadByUser } = useChat();
+  const { block, busy: blockBusy } = useBlockStatus();
 
   const { data: friends = [], isLoading: loadingFriends } = useQuery({ queryKey: ["friends"], queryFn: getFriends });
   const { data: people = [], isLoading: loadingUsers } = useQuery({ queryKey: ["users"], queryFn: getRecommendedUsers });
@@ -113,6 +122,19 @@ const Home = () => {
                           <span className="truncate">{u.location}</span>
                         </p>
                       )}
+                    </div>
+                    <div className="dropdown dropdown-end ml-auto">
+                      <button tabIndex={0} className="btn btn-ghost btn-xs btn-circle" aria-label="More options">
+                        <IoEllipsisHorizontal className="size-4" />
+                      </button>
+                      <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-2xl shadow-xl w-44 p-2 z-20">
+                        <li>
+                          <button className="text-error" onClick={() => block(u._id)} disabled={blockBusy}>
+                            <IoBan className="size-4" />
+                            Block
+                          </button>
+                        </li>
+                      </ul>
                     </div>
                   </div>
 

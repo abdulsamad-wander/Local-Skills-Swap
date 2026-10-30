@@ -13,7 +13,7 @@ const BottomNav = () => {
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-base-200/95 backdrop-blur border-t border-base-300 pb-[env(safe-area-inset-bottom)]">
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {NAV_ITEMS.map(({ to, label, Icon, ActiveIcon, badge }) => {
           const active = pathname === to;
           const I = active ? ActiveIcon : Icon;
@@ -23,7 +23,7 @@ const BottomNav = () => {
               <Link
                 to={to}
                 onClick={to === "/notifications" ? () => markSeen() : undefined}
-                className={`relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold ${
+                className={`relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${
                   active ? "text-primary" : "text-base-content/60"
                 }`}
               >

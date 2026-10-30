@@ -13,6 +13,7 @@ import Layout from "./components/Layout.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
 import Friends from "./page/Friends.jsx";
 import Settings from "./page/Settings.jsx";
+import Chats from "./page/Chats.jsx";
 import ChatProvider from "./context/ChatProvider.jsx";
 
 function App() {
@@ -71,6 +72,30 @@ function App() {
               )
             ) : (
               <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/chats"
+          element={
+            isAuthenticated && isOnBoarded ? (
+              <Layout showSidebar={true} title="Chats">
+                <Chats />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/group/:id"
+          element={
+            isAuthenticated && isOnBoarded ? (
+              <Layout showSidebar={true} title="Group" fullBleed>
+                <ChatPage group />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
             )
           }
         />

@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 import { applyProfileUpdate, syncStreamUser } from "../lib/profile.js";
+import { dmChannelId, setChannelFrozen } from "../lib/stream.js";
 
 export async function getRecommendedUsers(req, res) {
   try {
@@ -11,6 +12,8 @@ export async function getRecommendedUsers(req, res) {
       $and: [
         { _id: { $ne: currentUserId } }, //exclude current user
         { _id: { $nin: currentUser.friends } }, // exclude current user's friends
+        { _id: { $nin: currentUser.blockedUsers || [] } }, // exclude people I blocked
+        { blockedUsers: { $ne: currentUserId } }, // exclude people who blocked me
         { isOnboarded: true },
       ],
     });
@@ -49,6 +52,12 @@ export async function sendFriendRequest(req, res) {
     const recipient = await User.findById(recipientId);
     if (!recipient) {
       return res.status(404).json({ message: "Recipient not found" });
+    }
+
+    const iBlockedThem = (req.user.blockedUsers || []).some((id) => id.toString() === recipientId);
+    const theyBlockedMe = (recipient.blockedUsers || []).some((id) => id.toString() === myId);
+    if (iBlockedThem || theyBlockedMe) {
+      return res.status(403).json({ message: "You cannot send a request to this person" });
     }
 
     // check if user is already friends
@@ -197,6 +206,88 @@ export async function markNotificationsSeen(req, res) {
     res.status(200).json({ notificationsSeenAt: user.notificationsSeenAt });
   } catch (error) {
     console.error("Error in markNotificationsSeen controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function blockUser(req, res) {
+  try {
+    const { id: targetId } = req.params;
+
+    if (targetId === req.user.id) {
+      return res.status(400).json({ message: "You cannot block yourself" });
+    }
+
+    const target = await User.findById(targetId);
+    if (!target) return res.status(404).json({ message: "User not found" });
+
+    // the friendship stays, so unblocking puts things back as they were.
+    // any request still waiting for an answer is dropped.
+    await User.findByIdAndUpdate(req.user.id, { $addToSet: { blockedUsers: targetId } });
+    await FriendRequest.deleteMany({
+      $or: [
+        { sender: req.user.id, recipient: targetId },
+        { sender: targetId, recipient: req.user.id },
+      ],
+    });
+
+    // freezing closes the conversation for both of them
+    await setChannelFrozen(dmChannelId(req.user.id, targetId), true);
+
+    res.status(200).json({ success: true, blocked: true });
+  } catch (error) {
+    console.error("Error in blockUser controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function unblockUser(req, res) {
+  try {
+    const { id: targetId } = req.params;
+
+    await User.findByIdAndUpdate(req.user.id, { $pull: { blockedUsers: targetId } });
+
+    // only reopen the conversation if the other person has not blocked us too
+    const target = await User.findById(targetId).select("blockedUsers");
+    const stillBlocked = (target?.blockedUsers || []).some((id) => id.toString() === req.user.id);
+    if (!stillBlocked) {
+      await setChannelFrozen(dmChannelId(req.user.id, targetId), false);
+    }
+
+    res.status(200).json({ success: true, blocked: false, stillBlockedByThem: stillBlocked });
+  } catch (error) {
+    console.error("Error in unblockUser controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function getBlockedUsers(req, res) {
+  try {
+    const user = await User.findById(req.user.id)
+      .select("blockedUsers")
+      .populate("blockedUsers", "fullName profilePic location");
+
+    res.status(200).json(user?.blockedUsers || []);
+  } catch (error) {
+    console.error("Error in getBlockedUsers controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+/** Who this user has blocked, and who has blocked them. */
+export async function getBlockStatus(req, res) {
+  try {
+    const [me, blockedByDocs] = await Promise.all([
+      User.findById(req.user.id).select("blockedUsers"),
+      User.find({ blockedUsers: req.user.id }).select("_id"),
+    ]);
+
+    res.status(200).json({
+      blocked: (me?.blockedUsers || []).map((id) => id.toString()),
+      blockedBy: blockedByDocs.map((u) => u._id.toString()),
+    });
+  } catch (error) {
+    console.error("Error in getBlockStatus controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

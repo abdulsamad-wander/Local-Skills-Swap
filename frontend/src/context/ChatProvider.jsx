@@ -17,6 +17,7 @@ const ChatProvider = ({ children }) => {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [unreadByUser, setUnreadByUser] = useState({});
+  const [presenceByUser, setPresenceByUser] = useState({});
   // channel the user is currently looking at; its messages never count as unread
   const activeChannelRef = useRef(null);
 
@@ -62,13 +63,27 @@ const ChatProvider = ({ children }) => {
         if (cancelled) return;
 
         const seeded = {};
+        const presence = {};
         channels.forEach((ch) => {
+          const members = Object.values(ch.state.members);
+          members.forEach((m) => {
+            if (m.user_id === authUser._id || !m.user) return;
+            presence[m.user_id] = {
+              online: Boolean(m.user.online),
+              lastActive: m.user.last_active || null,
+            };
+          });
+
           const count = ch.countUnread();
           if (!count) return;
-          const other = Object.values(ch.state.members).find((m) => m.user_id !== authUser._id);
-          if (other) seeded[other.user_id] = count;
+          // unread badges are per person, so only one to one channels count
+          if (members.length === 2) {
+            const other = members.find((m) => m.user_id !== authUser._id);
+            if (other) seeded[other.user_id] = count;
+          }
         });
         setUnreadByUser(seeded);
+        setPresenceByUser(presence);
         setReady(true);
 
         const handler = (event) => {
@@ -105,11 +120,24 @@ const ChatProvider = ({ children }) => {
 
         // message.new covers channels we already watch; notification.message_new
         // fires for a channel the client is not watching yet (e.g. a first message)
+        const presenceHandler = (event) => {
+          const u = event.user;
+          if (!u?.id || u.id === authUser._id) return;
+          setPresenceByUser((prev) => ({
+            ...prev,
+            [u.id]: { online: Boolean(u.online), lastActive: u.last_active || null },
+          }));
+        };
+
         chatClient.on("message.new", handler);
         chatClient.on("notification.message_new", handler);
+        chatClient.on("user.presence.changed", presenceHandler);
+        chatClient.on("user.updated", presenceHandler);
         detach = () => {
           chatClient.off("message.new", handler);
           chatClient.off("notification.message_new", handler);
+          chatClient.off("user.presence.changed", presenceHandler);
+          chatClient.off("user.updated", presenceHandler);
         };
       } catch (error) {
         console.error("Could not connect to chat", error);
@@ -130,10 +158,11 @@ const ChatProvider = ({ children }) => {
       ready,
       unreadByUser,
       totalUnread: Object.values(unreadByUser).reduce((a, b) => a + b, 0),
+      presenceByUser,
       clearUnreadFor,
       setActiveChannel,
     }),
-    [ready, unreadByUser, clearUnreadFor, setActiveChannel]
+    [ready, unreadByUser, presenceByUser, clearUnreadFor, setActiveChannel]
   );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

@@ -82,3 +82,45 @@ export const getStreamToken = async () => {
   const response = await axiosInstance.get("/chat/token");
   return response.data;
 };
+
+// ---- blocking ----
+export const blockUser = async (userId) => {
+  const response = await axiosInstance.post(`/users/${userId}/block`);
+  return response.data;
+};
+
+export const unblockUser = async (userId) => {
+  const response = await axiosInstance.delete(`/users/${userId}/block`);
+  return response.data;
+};
+
+export const getBlockedUsers = async () => {
+  const response = await axiosInstance.get("/users/blocked");
+  return response.data;
+};
+
+// ---- groups ----
+export const createGroup = async ({ name, memberIds, image }) => {
+  const response = await axiosInstance.post("/chat/groups", { name, memberIds, image });
+  return response.data;
+};
+
+export const updateGroup = async ({ channelId, name, image }) => {
+  const response = await axiosInstance.put(`/chat/groups/${channelId}`, { name, image });
+  return response.data;
+};
+
+export const addGroupMembers = async ({ channelId, memberIds }) => {
+  const response = await axiosInstance.post(`/chat/groups/${channelId}/members`, { memberIds });
+  return response.data;
+};
+
+export const removeGroupMember = async ({ channelId, userId }) => {
+  const response = await axiosInstance.delete(`/chat/groups/${channelId}/members/${userId}`);
+  return response.data;
+};
+
+export const getBlockStatus = async () => {
+  const response = await axiosInstance.get("/users/block-status");
+  return response.data;
+};

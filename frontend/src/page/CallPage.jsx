@@ -1,65 +1,69 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
-import useAuthUser from '../hooks/useAuthUser';
-import { useQuery } from '@tanstack/react-query';
-import { getStreamToken } from '../lib/api';
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   StreamVideo,
   StreamVideoClient,
-  StreamCall
+  StreamCall,
 } from "@stream-io/video-react-sdk";
-
 import "@stream-io/video-react-sdk/dist/css/styles.css";
-import toast from 'react-hot-toast';
-import PageLoader from '../components/PageLoader';
-import CallContent from '../components/CallContent';
+import toast from "react-hot-toast";
+import useAuthUser from "../hooks/useAuthUser";
+import { getStreamToken } from "../lib/api";
+import PageLoader from "../components/PageLoader";
+import CallContent from "../components/CallContent";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
+
 const CallPage = () => {
-  const {id : callId } = useParams();
-  const [client, setClient ] = useState(null);
-  const[call, setCall] = useState(null);
-  const[isConnecting, setIsConnecting] = useState(true);
+  const { id: callId } = useParams();
+  const [params] = useSearchParams();
+  const audioOnly = params.get("audio") === "1";
+
+  const [client, setClient] = useState(null);
+  const [call, setCall] = useState(null);
+  const [isConnecting, setIsConnecting] = useState(true);
 
   const { authUser, isLoading } = useAuthUser();
-  const { data : tokenData} = useQuery({
-    queryKey : ["streamToken"],
-    queryFn : getStreamToken,
-    enabled : !!authUser
+  const { data: tokenData } = useQuery({
+    queryKey: ["streamToken"],
+    queryFn: getStreamToken,
+    enabled: !!authUser,
   });
 
-  useEffect(()=>{
-    const initCall = async ()=>{
-      if(!authUser || !tokenData?.token || !callId) return;
+  useEffect(() => {
+    let cancelled = false;
+
+    const initCall = async () => {
+      if (!authUser || !tokenData?.token || !callId) return;
       try {
-        console.log("Initializing stream video call....");
-        const user = {
-          id : authUser._id,
-          name : authUser.fullName,
-          image : authUser.profilePic,
-        };
         const videoStreamClient = new StreamVideoClient({
-          apiKey : STREAM_API_KEY,
-          user,
-          token : tokenData.token
+          apiKey: STREAM_API_KEY,
+          user: { id: authUser._id, name: authUser.fullName, image: authUser.profilePic },
+          token: tokenData.token,
         });
 
         const callInstance = videoStreamClient.call("default", callId);
-        await callInstance.join({ create : true});
-        console.log("Joined call successfully");
+        await callInstance.join({ create: true });
+
+        // a voice call is the same call with the camera left off
+        if (audioOnly) await callInstance.camera.disable().catch(() => {});
+
+        if (cancelled) return;
         setClient(videoStreamClient);
         setCall(callInstance);
       } catch (error) {
         console.error("Error in joining call", error);
-        toast.error("Could not join call. Please try again");
-      } finally{
-        setIsConnecting(false);
+        if (!cancelled) toast.error("Could not join the call. Please try again.");
+      } finally {
+        if (!cancelled) setIsConnecting(false);
       }
     };
+
     initCall();
 
     return () => {
-      // leave the call and disconnect the client when leaving the page
+      cancelled = true;
       setCall((current) => {
         if (current) current.leave().catch(() => {});
         return null;
@@ -69,8 +73,9 @@ const CallPage = () => {
         return null;
       });
     };
-  },[tokenData, authUser, callId]);
-  if(isLoading || isConnecting) return <PageLoader/>
+  }, [tokenData, authUser, callId, audioOnly]);
+
+  if (isLoading || isConnecting) return <PageLoader />;
 
   return (
     <div className="h-screen bg-base-100">
@@ -78,7 +83,7 @@ const CallPage = () => {
         {client && call ? (
           <StreamVideo client={client}>
             <StreamCall call={call}>
-              <CallContent />
+              <CallContent audioOnly={audioOnly} />
             </StreamCall>
           </StreamVideo>
         ) : (
@@ -94,4 +99,4 @@ const CallPage = () => {
   );
 };
 
-export default CallPage
+export default CallPage;

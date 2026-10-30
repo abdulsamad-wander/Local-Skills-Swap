@@ -1,5 +1,6 @@
 import {
   IoHomeOutline, IoHome,
+  IoChatbubbleEllipsesOutline, IoChatbubbleEllipses,
   IoPeopleOutline, IoPeople,
   IoNotificationsOutline, IoNotifications,
   IoSettingsOutline, IoSettings,
@@ -7,7 +8,8 @@ import {
 
 export const NAV_ITEMS = [
   { to: "/", label: "Home", Icon: IoHomeOutline, ActiveIcon: IoHome },
-  { to: "/friends", label: "Friends", Icon: IoPeopleOutline, ActiveIcon: IoPeople, badge: "chat" },
+  { to: "/chats", label: "Chats", Icon: IoChatbubbleEllipsesOutline, ActiveIcon: IoChatbubbleEllipses, badge: "chat" },
+  { to: "/friends", label: "Friends", Icon: IoPeopleOutline, ActiveIcon: IoPeople },
   { to: "/notifications", label: "Notifications", Icon: IoNotificationsOutline, ActiveIcon: IoNotifications, badge: "requests" },
   { to: "/settings", label: "Settings", Icon: IoSettingsOutline, ActiveIcon: IoSettings },
 ];
