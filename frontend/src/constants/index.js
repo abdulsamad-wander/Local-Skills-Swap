@@ -198,8 +198,8 @@ export const LANGUAGE_TO_FLAG = {
   italian: "it",
   turkish: "tr",
   dutch: "nl",
-  urdu : "ur",
-  pan : "pn",
-  bengali : "bn",
-  persian  : "pr"
+  urdu: "pk",
+  punjabi: "in",
+  bengali: "bd",
+  persian: "ir",
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import { useQuery } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api";
@@ -16,8 +16,6 @@ import { StreamChat } from "stream-chat";
 import toast from "react-hot-toast";
 import ChatLoader from "../components/ChatLoader.jsx";
 import CallButton from "../components/CallButton.jsx";
-
-let globalChatClient = null;
 
 const ChatPage = () => {
   const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
@@ -39,16 +37,20 @@ const ChatPage = () => {
       if (!dataToken?.token || !authUser) return;
       try {
         console.log("Initializing stream chat...");
-        let client = globalChatClient;
-        client = StreamChat.getInstance(STREAM_API_KEY);
-        await client.connectUser(
+        const client = StreamChat.getInstance(STREAM_API_KEY);
+
+        // Only connect if not already connected as this user
+        if (client.userID !== authUser._id) {
+          if (client.userID) await client.disconnectUser();
+          await client.connectUser(
           {
             id: authUser._id,
             name: authUser.fullName,
             image: authUser.profilePic || null,
           },
-          dataToken.token,
-        );
+            dataToken.token,
+          );
+        }
         const channelId = [authUser._id, targetUserId].sort().join("-");
         //You and me
         //If I start a chat channelId = [myId, yourId],
@@ -59,25 +61,28 @@ const ChatPage = () => {
           members: [authUser._id, targetUserId],
         });
         await currChannel.watch();
+        if (cancelled) return;
         setChatClient(client);
         setChannel(currChannel);
       } catch (error) {
+        if (cancelled) return;
         console.error("Error initializing chat", error);
         toast.error("Could not connect to the chat. Please try again");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
+    let cancelled = false;
     initChat();
 
-    // cleanup on unmount
+    // The chat client is a shared singleton and stays connected while the
+    // user is logged in; it is disconnected in useLogout. Here we only make
+    // sure a stale async init cannot update state after unmount.
     return () => {
-      if (globalChatClient) {
-        globalChatClient.disconnectUser().catch(() => {});
-        globalChatClient = null;
-      }
+      cancelled = true;
     };
-  }, [dataToken, authUser, targetUserId]);
+  }, [dataToken, authUser, targetUserId, STREAM_API_KEY]);
 
   //handle video call
   const handleVideocall = async () => {
@@ -96,18 +101,20 @@ const ChatPage = () => {
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
   return (
-    <div className="h-[93vh]:">
+    <div className="h-[calc(100vh-4rem)] flex flex-col">
       <Chat client={chatClient}>
         <Channel channel={channel}>
-          <div className="w-full relative">
-            <CallButton handleVideoCall={handleVideocall} />
+          <div className="flex-1 min-h-0 flex relative">
+            <div className="absolute right-4 top-3 z-10">
+              <CallButton handleVideoCall={handleVideocall} />
+            </div>
             <Window>
               <ChannelHeader />
               <MessageList />
               <MessageInput focus />
             </Window>
+            <Thread />
           </div>
-          <Thread />
         </Channel>
       </Chat>
     </div>

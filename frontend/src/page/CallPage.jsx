@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import useAuthUser from '../hooks/useAuthUser';
 import { useQuery } from '@tanstack/react-query';
 import { getStreamToken } from '../lib/api';
@@ -58,12 +58,23 @@ const CallPage = () => {
     };
     initCall();
 
+    return () => {
+      // leave the call and disconnect the client when leaving the page
+      setCall((current) => {
+        if (current) current.leave().catch(() => {});
+        return null;
+      });
+      setClient((current) => {
+        if (current) current.disconnectUser().catch(() => {});
+        return null;
+      });
+    };
   },[tokenData, authUser, callId]);
   if(isLoading || isConnecting) return <PageLoader/>
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center">
-      <div className="relative">
+    <div className="h-screen bg-base-100">
+      <div className="h-full">
         {client && call ? (
           <StreamVideo client={client}>
             <StreamCall call={call}>
@@ -71,8 +82,11 @@ const CallPage = () => {
             </StreamCall>
           </StreamVideo>
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <p>Could not initialize call. Please refresh or try again later.</p>
+          <div className="h-full grid place-items-center p-6 text-center">
+            <div>
+              <h2 className="text-xl font-extrabold">Could not start the call</h2>
+              <p className="text-base-content/60 mt-1">Refresh the page or try again from the chat.</p>
+            </div>
           </div>
         )}
       </div>

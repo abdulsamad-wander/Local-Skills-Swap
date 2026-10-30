@@ -2,31 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-.str-chat__channel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(to bottom, #c9e8c9, #b7e7bb);
-  height: 90vh;
-}
-.str-chat__container {
-  max-width: 1230px;
-  width: 100%;
-  height: 90% !important;
-  margin: 0 auto !important;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
-.str-chat__list {
-  background-color: #ffffff;
-  padding: 12px;
+@layer base {
+  html {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-base-100 text-base-content;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-base-100;
+  }
 }
 
+@layer components {
+  /* person card used in discover feed and friends grid */
+  .person-card {
+    @apply rounded-3xl bg-base-200 p-5 flex flex-col gap-4;
+  }
+  .lang-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-base-100 px-3 py-1 text-xs font-semibold;
+  }
+  .nav-pill {
+    @apply flex items-center gap-3 rounded-2xl px-4 py-3 font-semibold text-base-content/70 transition-colors;
+  }
+  .nav-pill:hover {
+    @apply bg-base-300/60 text-base-content;
+  }
+  .nav-pill.is-active {
+    @apply bg-primary text-primary-content;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Stream chat: let it fill the content area and follow the theme */
+.str-chat {
+  --str-chat__font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --str-chat__border-radius-circle: 9999px;
+  height: 100%;
+}
+.str-chat__channel,
+.str-chat__container {
+  height: 100%;
+}
 .str-chat__list-notifications {
   display: none;
-}
-
-.str-chat__message-input {
-  border-top: 1px solid #ddd;
 }

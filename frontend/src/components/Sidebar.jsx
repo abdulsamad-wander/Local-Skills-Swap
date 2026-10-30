@@ -1,106 +1,53 @@
-import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { Link, useLocation } from "react-router";
-import { GiShipWheel } from "react-icons/gi";
-import { IoIosHome } from "react-icons/io";
-import { FaUserAstronaut } from "react-icons/fa";
-import { FaBell } from "react-icons/fa6";
-import { useQuery } from "@tanstack/react-query";
-import { getFriendReq } from "../lib/api";
+import { NAV_ITEMS } from "../constants/nav";
+import { useUnseenCount } from "../hooks/useUnseenCount";
+import Logo from "./Logo";
+import UserAvatar from "./UserAvatar";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
-  const location = useLocation();
-  const currPath = location.pathname;
-  const [lastViewedCount, setLastViewedCount] = useState(0);
-  
-  const { data: friendReqs } = useQuery({
-    queryKey: ["friendReqs"],
-    queryFn: getFriendReq,
-  });
-  
-  const incomingReqts = friendReqs?.incomingReqs || [];
-  const acceptedReqts = friendReqs?.acceptedReqs || [];
-  const currentTotal = incomingReqts.length + acceptedReqts.length;
+  const { pathname } = useLocation();
+  const { unseen, markSeen } = useUnseenCount();
 
-  const unseenCount = Math.max(0, currentTotal - lastViewedCount);
-  
-  const handleNotificationClick = () => {
-    setLastViewedCount(currentTotal);
-  };
-  
-  useEffect(() => {
-    if (currPath === "/notifications") {
-      setLastViewedCount(currentTotal);
-    }
-  }, [currPath, currentTotal]);
-  
   return (
-    <aside className="w-64 bg-base-200 border-r border-base-300 hidden lg:flex md:flex flex-col h-screen sticky top-0">
-      <div className="p-4 border-b border-base-300">
-        <Link to={"/"} className="flex items-center gap-2">
-          <GiShipWheel className="size-8 text-primary animate-spin" />
-          <span className="text-2xl font-bold font-mono bg-clip-text tracking-wider text-blue-500">
-            Speak<span className="text-yellow-500">Zen</span>
-          </span>
-        </Link>
+    <aside className="hidden lg:flex w-64 shrink-0 flex-col h-screen sticky top-0 bg-base-200 px-4 py-5">
+      <div className="px-2 mb-8">
+        <Logo />
       </div>
-      <nav className="flex-1 p-4 space-y-1">
-        <Link
-          to="/"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currPath === "/" ? "btn-active" : ""
-          }`}
-        >
-          <IoIosHome className="size-4 text-base-content opacity-70" />
-          <span>Home</span>
-        </Link>
 
-        <Link
-          to="/friends"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currPath === "/friends" ? "btn-active" : ""
-          }`}
-        >
-          <FaUserAstronaut className="size-4 text-base-content opacity-70" />
-          <span>Friends</span>
-        </Link>
-
-        <Link
-          to="/notifications"
-          onClick={handleNotificationClick}
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currPath === "/notifications" ? "btn-active" : ""
-          }`}
-        >
-          <FaBell className="size-4 text-base-content opacity-70" />
-          <span>Notifications</span>
-
-          {unseenCount > 0 && (
-            <span className="badge badge-primary ml-2">
-              {unseenCount > 9 ? "9+" : unseenCount}
-            </span>
-          )}
-        </Link>
+      <nav className="flex flex-col gap-1">
+        {NAV_ITEMS.map(({ to, label, Icon, ActiveIcon }) => {
+          const active = pathname === to;
+          const I = active ? ActiveIcon : Icon;
+          return (
+            <Link
+              key={to}
+              to={to}
+              onClick={to === "/notifications" ? markSeen : undefined}
+              className={`nav-pill ${active ? "is-active" : ""}`}
+            >
+              <I className="size-5" />
+              <span>{label}</span>
+              {to === "/notifications" && unseen > 0 && (
+                <span className="ml-auto badge badge-secondary badge-sm font-bold">
+                  {unseen > 9 ? "9+" : unseen}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* USER PROFILE SECTION */}
-      <div className="p-4 border-t border-base-300 mt-auto">
-        <div className="flex items-center gap-3">
-          <div className="avatar">
-            <div className="w-8 rounded-full">
-              <img src={authUser?.profilePic || ""} alt="User Avatar" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-xs">{authUser?.fullName}</p>
-            <p className="text-xs text-success flex items-center gap-1">
-              <span className="size-2 rounded-full bg-success inline-block" />
-              Online
-            </p>
+      {authUser && (
+        <div className="mt-auto flex items-center gap-3 rounded-2xl bg-base-100 p-3">
+          <UserAvatar src={authUser.profilePic} name={authUser.fullName} size="sm" online />
+          <div className="min-w-0">
+            <p className="font-bold text-sm truncate">{authUser.fullName}</p>
+            <p className="text-xs text-base-content/60 truncate">{authUser.location || "Online"}</p>
           </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 };

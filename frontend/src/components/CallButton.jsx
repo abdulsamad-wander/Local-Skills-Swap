@@ -1,14 +1,10 @@
-import { CiVideoOn } from "react-icons/ci";
+import { IoVideocamOutline } from "react-icons/io5";
 
-
-function CallButton({ handleVideoCall }) {
-  return (
-    <div className="p-3 border-b flex items-center justify-end max-w-7xl mx-auto w-full absolute top-0 z-10">
-      <button onClick={handleVideoCall} className="btn btn-success btn-sm text-white">
-        <CiVideoOn className="w-6 h-6" />
-      </button>
-    </div>
-  );
-}
+const CallButton = ({ handleVideoCall }) => (
+  <button onClick={handleVideoCall} className="btn btn-primary btn-sm rounded-full gap-2" title="Start video call">
+    <IoVideocamOutline className="size-5" />
+    <span className="hidden sm:inline">Video call</span>
+  </button>
+);
 
 export default CallButton;

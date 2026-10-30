@@ -1,54 +1,41 @@
+import { IoLogOutOutline } from "react-icons/io5";
 import useAuthUser from "../hooks/useAuthUser";
-import ThemeSelector from "./ThemeSelector";
-import { CiLogout } from "react-icons/ci";
 import useLogout from "../hooks/useLogout";
+import ThemeSelector from "./ThemeSelector";
+import Logo from "./Logo";
+import UserAvatar from "./UserAvatar";
 
-const Navbar = () => {
+const Navbar = ({ title }) => {
   const { authUser } = useAuthUser();
-  const { logoutMutation } = useLogout();
+  const { logoutMutation, isPending } = useLogout();
 
   return (
-    <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-30 h-16 flex items-center">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between w-full">
+    <header className="sticky top-0 z-30 h-16 bg-base-100/90 backdrop-blur border-b border-base-200">
+      <div className="h-full px-4 sm:px-6 flex items-center gap-3">
+        <div className="lg:hidden">
+          <Logo />
+        </div>
+        {title && <h1 className="hidden lg:block text-lg font-extrabold tracking-tight">{title}</h1>}
 
-          {/* LEFT SIDE LOGO (CHAT PAGE ONLY) */}
-        
-
-          {/* RIGHT SIDE NAVBAR ITEMS */}
-          <div className="flex items-center gap-2 ml-auto">
-
-            {/* THEME SELECTOR */}
-            <ThemeSelector />
-
-            {/* USER AVATAR */}
-            {authUser && (
-              <div className="avatar">
-                <div className="w-8 rounded-full">
-                  <img
-                    src={authUser?.profilePic || ""}
-                    alt="User Avatar"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* LOGOUT BUTTON */}
-            {authUser && (
+        <div className="ml-auto flex items-center gap-1">
+          <ThemeSelector />
+          {authUser && (
+            <>
               <button
-                onClick={logoutMutation}
+                onClick={() => logoutMutation()}
+                disabled={isPending}
                 className="btn btn-ghost btn-circle"
-                title="Logout"
+                title="Log out"
+                aria-label="Log out"
               >
-                <CiLogout className="h-6 w-6 text-base-content opacity-70" />
+                <IoLogOutOutline className="size-6" />
               </button>
-            )}
-
-          </div>
+              <UserAvatar src={authUser.profilePic} name={authUser.fullName} size="sm" className="ml-1" />
+            </>
+          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 };
 

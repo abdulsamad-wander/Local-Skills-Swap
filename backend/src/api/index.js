@@ -32,6 +32,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.set("trust proxy", 1);
 
 /** On Vercel, connect once per warm instance (connectDB caches). */
 app.use(async (req, res, next) => {

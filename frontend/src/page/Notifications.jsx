@@ -1,20 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { acceptFriendReqs, getFriendReq } from "../lib/api";
-import { FiUserCheck } from "react-icons/fi";
-import { LuMessageSquare } from "react-icons/lu";
-import { GoClock } from "react-icons/go";
-import { FaRegBell } from "react-icons/fa";
 import NoNotificationFound from "../components/NoNotificationFound";
+import UserAvatar from "../components/UserAvatar";
+import LanguagePair from "../components/LanguagePair";
 
 const Notifications = () => {
   const queryClient = useQueryClient();
 
-  const { data: friendReqs, isLoading } = useQuery({
-    queryKey: ["friendReqs"],
-    queryFn: getFriendReq,
-  });
+  const { data, isLoading } = useQuery({ queryKey: ["friendReqs"], queryFn: getFriendReq });
 
-  const { mutate: acceptMutation, isPending } = useMutation({
+  const { mutate: accept, isPending, variables: acceptingId } = useMutation({
     mutationFn: acceptFriendReqs,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["friendReqs"] });
@@ -22,132 +19,68 @@ const Notifications = () => {
     },
   });
 
-  const incomingReqts = friendReqs?.incomingReqs || [];
-  const acceptedReqts = friendReqs?.acceptedReqs || [];
+  const incoming = data?.incomingReqs || [];
+  const accepted = data?.acceptedReqs || [];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="container mx-auto max-w-4xl space-y-8">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">
-          Notifications
-        </h1>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+      <h2 className="text-2xl font-extrabold tracking-tight">Notifications</h2>
 
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg" />
-          </div>
-        ) : (
-          <>
-            {/* INCOMING FRIEND REQUESTS */}
-            {incomingReqts.length > 0 && (
-              <section className="space-y-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <FiUserCheck className="h-4 w-4 text-primary" />
-                  Friend Requests
-                  <span className="badge badge-primary ml-2">
-                    {incomingReqts.length}
-                  </span>
-                </h2>
-
-                <div className="space-y-3">
-                  {incomingReqts.map((request) => (
-                    <div
-                      key={request._id}
-                      className="card bg-base-200 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div className="card-body p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="avatar w-14 h-14 rounded-full bg-base-300">
-                              <img
-                                src={request?.sender?.profilePic}
-                                alt={request?.sender?.fullName}
-                              />
-                            </div>
-                            <div>
-                              <h3 className="font-semibold">
-                                {request?.sender?.fullName}
-                              </h3>
-                              <div className="flex flex-wrap gap-1.5 mt-1">
-                                <span className="badge badge-secondary badge-sm">
-                                  Native: {request?.sender?.nativeLanguage}
-                                </span>
-                                <span className="badge badge-outline badge-sm">
-                                  Learning: {request?.sender?.learningLanguage}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => acceptMutation(request._id)}
-                            disabled={isPending}
-                          >
-                            Accept
-                          </button>
-                        </div>
-                      </div>
+      {isLoading ? (
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => <div key={i} className="skeleton h-20 rounded-3xl" />)}
+        </div>
+      ) : incoming.length === 0 && accepted.length === 0 ? (
+        <NoNotificationFound />
+      ) : (
+        <>
+          {incoming.length > 0 && (
+            <section className="space-y-3">
+              <h3 className="font-bold text-base-content/70">
+                Wants to connect <span className="badge badge-primary badge-sm ml-1">{incoming.length}</span>
+              </h3>
+              {incoming.map((r) => (
+                <div key={r._id} className="rounded-3xl bg-base-200 p-4 flex items-center gap-4">
+                  <UserAvatar src={r.sender?.profilePic} name={r.sender?.fullName} size="md" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-extrabold truncate">{r.sender?.fullName}</p>
+                    <div className="mt-1">
+                      <LanguagePair native={r.sender?.nativeLanguage} learning={r.sender?.learningLanguage} compact />
                     </div>
-                  ))}
+                  </div>
+                  <button
+                    className="btn btn-primary btn-sm rounded-full"
+                    onClick={() => accept(r._id)}
+                    disabled={isPending}
+                  >
+                    {isPending && acceptingId === r._id ? <span className="loading loading-spinner loading-xs" /> : "Accept"}
+                  </button>
                 </div>
-              </section>
-            )}
+              ))}
+            </section>
+          )}
 
-            {/* ACCEPTED REQUESTS */}
-            {acceptedReqts.length > 0 && (
-              <section className="space-y-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <FaRegBell className="w-4 h-4 text-success" />
-                  New Connections
-                </h2>
-
-                <div className="space-y-3">
-                  {acceptedReqts.map((notification) => (
-                    <div
-                      className="card bg-base-200 shadow-sm"
-                      key={notification._id}
-                    >
-                      <div className="card-body p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="avatar mt-1 size-10 rounded-full">
-                            <img
-                              src={notification?.recipient?.profilePic}
-                              alt={notification?.recipient?.fullName}
-                            />
-                          </div>
-
-                          <div className="flex-1">
-                            <h3 className="font-semibold">
-                              {notification?.recipient?.fullName}
-                            </h3>
-                            <p className="text-sm my-1">
-                              {notification?.recipient?.fullName} accepted your
-                              friend request
-                            </p>
-                            <p className="text-xs flex items-center opacity-70">
-                              <GoClock className="h-3 w-3 mr-1" />
-                              Recently
-                            </p>
-                          </div>
-
-                          <div className="badge badge-success">
-                            <LuMessageSquare className="h-3 w-3 mr-1" />
-                            New Friend
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+          {accepted.length > 0 && (
+            <section className="space-y-3">
+              <h3 className="font-bold text-base-content/70">New connections</h3>
+              {accepted.map((n) => (
+                <div key={n._id} className="rounded-3xl bg-base-200 p-4 flex items-center gap-4">
+                  <UserAvatar src={n.recipient?.profilePic} name={n.recipient?.fullName} size="md" online />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm">
+                      <span className="font-extrabold">{n.recipient?.fullName}</span> accepted your request. Say hello.
+                    </p>
+                  </div>
+                  <Link to={`/chat/${n.recipient?._id}`} className="btn btn-ghost btn-sm rounded-full gap-2">
+                    <IoChatbubbleEllipsesOutline className="size-4" />
+                    Chat
+                  </Link>
                 </div>
-              </section>
-            )}
-          </>
-        )}
-        {incomingReqts.length === 0 && acceptedReqts.length === 0 && (
-          <NoNotificationFound/>
-        )}
-      </div>
+              ))}
+            </section>
+          )}
+        </>
+      )}
     </div>
   );
 };

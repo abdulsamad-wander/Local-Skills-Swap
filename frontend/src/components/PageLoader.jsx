@@ -1,13 +1,12 @@
-import React from 'react'
-import { FaSpinner } from "react-icons/fa6";
-import { useThemeStore } from '../store/useThemeStore';
-const PageLoader = () => {
-  const { theme }  = useThemeStore();
-  return (
-    <div className='min-h-screen flex items-center justify-center' data-theme ={theme}>
-      <FaSpinner className='animate-spin text-primary size-12'/>
-    </div>
-  )
-}
+import { useThemeStore } from "../store/useThemeStore";
 
-export default PageLoader
+const PageLoader = () => {
+  const { theme } = useThemeStore();
+  return (
+    <div className="min-h-screen grid place-items-center" data-theme={theme}>
+      <span className="loading loading-dots loading-lg text-primary" />
+    </div>
+  );
+};
+
+export default PageLoader;

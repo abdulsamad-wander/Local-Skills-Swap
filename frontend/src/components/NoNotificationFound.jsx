@@ -1,18 +1,11 @@
-import React from 'react'
-import { FaBell } from 'react-icons/fa'
+import { IoNotificationsOffOutline } from "react-icons/io5";
 
-const NoNotificationFound = () => {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="size-16 rounded-full bg-base-300 flex items-center justify-center mb-4">
-        <FaBell className="size-6 text-base-content opacity-40" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2">No notifications yet</h3>
-      <p className="text-base-content opacity-70 max-w-md">
-        When you receive friend requests or messages, they'll appear here.
-      </p>
-    </div>
-  )
-}
+const NoNotificationFound = () => (
+  <div className="rounded-3xl border-2 border-dashed border-base-300 p-10 text-center">
+    <IoNotificationsOffOutline className="size-10 mx-auto text-base-content/40" />
+    <h3 className="font-extrabold text-lg mt-3">You're all caught up</h3>
+    <p className="text-base-content/60 mt-1">Friend requests and new connections will show up here.</p>
+  </div>
+);
 
-export default NoNotificationFound
+export default NoNotificationFound;

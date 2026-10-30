@@ -6,7 +6,7 @@ import {
   CallingState,
   useCall,
 } from "@stream-io/video-react-sdk";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const CallContent = () => {
   const call = useCall();
@@ -16,7 +16,7 @@ const CallContent = () => {
     if (!call) return;
 
     const unsub = call.on("call.ended", () => {
-      navigate("/chat");
+      navigate("/");
     });
 
     return () => unsub?.();

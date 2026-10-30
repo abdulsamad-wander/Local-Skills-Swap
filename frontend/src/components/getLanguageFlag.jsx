@@ -10,8 +10,8 @@ const getLanguageFlag = (language) => {
     return (
       <img
         src={`https://flagcdn.com/24x18/${countryCode}.png`}
-        alt={`${langLower} flag`}
-        className="h-3 mr-1 inline-block"
+        alt=""
+        className="h-3 w-4 rounded-[2px] object-cover"
       />
     );
   }

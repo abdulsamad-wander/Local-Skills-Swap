@@ -29,7 +29,7 @@ function App() {
           path="/"
           element={
             isAuthenticated && isOnBoarded ? (
-              <Layout showSidebar={true}>
+              <Layout showSidebar={true} title="Home">
                 <Home />
               </Layout>
             ) : (
@@ -75,7 +75,7 @@ function App() {
           path="/chat/:id"
           element={
             isAuthenticated && isOnBoarded ? (
-              <Layout showSidebar={true}>
+              <Layout showSidebar={true} title="Chat" fullBleed>
                 <ChatPage />
               </Layout>
             ) : (
@@ -87,7 +87,7 @@ function App() {
           path="/friends"
           element={
             isAuthenticated && isOnBoarded ? (
-              <Layout showSidebar={true}>
+              <Layout showSidebar={true} title="Friends">
                 <Friends />
               </Layout>
             ) : (
@@ -109,7 +109,7 @@ function App() {
           path="/notifications"
           element={
             isAuthenticated && isOnBoarded ? (
-              <Layout showSidebar={true}>
+              <Layout showSidebar={true} title="Notifications">
                 <Notifications />
               </Layout>
             ) : (

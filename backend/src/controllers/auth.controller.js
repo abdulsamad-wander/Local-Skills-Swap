@@ -11,6 +11,13 @@ const baseCookieOptions = {
   path: "/",
 };
 
+// Never send the password hash back to the client
+const sanitizeUser = (user) => {
+  const obj = user.toObject ? user.toObject() : { ...user };
+  delete obj.password;
+  return obj;
+};
+
 export async function signup(req, res) {
   const { email, password, fullName } = req.body;
 
@@ -35,10 +42,10 @@ export async function signup(req, res) {
     if (existingUser) {
       return res
         .status(400)
-        .json({ message: "Email already exists, please use a diffrent one" });
+        .json({ message: "Email already exists, please use a different one" });
     }
 
-    const idx = Math.floor(Math.random() * 70) + 1; // generate a num between 1-100
+    const idx = Math.floor(Math.random() * 70) + 1; // generate a num between 1-70
     const randomAvatar = `https://i.pravatar.cc/300?img=${idx}`;
 
     const newUser = await User.create({
@@ -72,7 +79,7 @@ export async function signup(req, res) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(201).json({ success: true, user: newUser });
+    res.status(201).json({ success: true, user: sanitizeUser(newUser) });
   } catch (error) {
     console.log("Error in signup controller", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -104,7 +111,7 @@ export async function login(req, res) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, user: sanitizeUser(user) });
   } catch (error) {
     console.log("Error in login controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -118,13 +125,13 @@ export function logout(req, res) {
 
 export function getUser(req, res) {
   res.status(200).json({ success: true, user: req.user });
-};
+}
 
 export async function onboard(req, res) {
   try {
     const userId = req.user._id;
 
-    const { bio, nativeLanguage, learningLanguage, location } =
+    const { bio, nativeLanguage, learningLanguage, location, profilePic } =
       req.body;
 
     if (
@@ -147,11 +154,15 @@ export async function onboard(req, res) {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
-        ...req.body,
+        bio,
+        nativeLanguage,
+        learningLanguage,
+        location,
+        ...(profilePic ? { profilePic } : {}),
         isOnboarded: true,
       },
-      { new: true }
-    );
+      { new: true, runValidators: true }
+    ).select("-password");
 
     if (!updatedUser)
       return res.status(404).json({ message: "User not found" });

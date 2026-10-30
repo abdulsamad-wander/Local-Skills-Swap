@@ -1,15 +1,18 @@
-import React, { useState } from "react";
-import useAuthUser from "../hooks/useAuthUser";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { IoShuffleOutline, IoLocationOutline } from "react-icons/io5";
+import useAuthUser from "../hooks/useAuthUser";
 import { onBordingFn } from "../lib/api";
 import { LANGUAGES } from "../constants/index.js";
-import { FaCameraRetro } from "react-icons/fa";
-import { FaShuffle } from "react-icons/fa6";
-import { LuLoader, LuMapPin, LuShipWheel } from "react-icons/lu";
+import { useThemeStore } from "../store/useThemeStore";
+import Logo from "../components/Logo";
+import UserAvatar from "../components/UserAvatar";
+import LanguagePair from "../components/LanguagePair";
 
 const OnBoarding = () => {
   const { authUser } = useAuthUser();
+  const { theme } = useThemeStore();
 
   const [form, setForm] = useState({
     bio: authUser?.bio || "",
@@ -23,11 +26,11 @@ const OnBoarding = () => {
   const { mutate: onBoardingMutation, isPending } = useMutation({
     mutationFn: onBordingFn,
     onSuccess: () => {
-      toast.success("Profile OnBoarded Successfully");
+      toast.success("Profile saved. Welcome in!");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
     onError: (error) => {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Could not save your profile. Please try again.");
     },
   });
 
@@ -35,178 +38,91 @@ const OnBoarding = () => {
     e.preventDefault();
     onBoardingMutation(form);
   };
-  const handleRandomAvator = () => {
-    const idx = Math.floor(Math.random() * 70) + 1; // 1-100 included
-    const randomAvatar = `https://i.pravatar.cc/300?img=${idx}`;
 
-    setForm({ ...form, profilePic: randomAvatar });
-    toast.success("Random profile picture generated!");
+  const handleRandomAvatar = () => {
+    const idx = Math.floor(Math.random() * 70) + 1;
+    setForm({ ...form, profilePic: `https://i.pravatar.cc/300?img=${idx}` });
   };
 
+  const field = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        backgroundImage: "url('/2.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        backgroundBlendMode: "darken",
-      }}
-    >
-      <div
-        className="rounded-md shadow-lg max-w-2xl w-full py-4 px-2"
-        data-theme="coffee"
-      >
-        <div className="card  max-w-3xl shadow-xl">
-          <div className="card-body p-6 sm:p-8">
-            <h1 className="text-xl sm:text-2xl font-bold text-center mb-3">
-              Complete Your Profile
-            </h1>
+    <div className="min-h-screen bg-base-100" data-theme={theme}>
+      <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+        <Logo />
+        <h1 className="text-3xl font-extrabold tracking-tight mt-8">Set up your profile</h1>
+        <p className="text-base-content/60 mt-1">This is what partners see before they say hi.</p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* PROFILE PIC CONTAINER */}
-              <div className="flex flex-col items-center justify-center space-y-3">
-                {/* IMAGE PREVIEW */}
-                <div className="size-28 rounded-full bg-base-300 overflow-hidden">
-                  {form.profilePic ? (
-                    <img
-                      src={form.profilePic}
-                      alt="Profile Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <FaCameraRetro className="size-8 text-base-content opacity-40" />
-                    </div>
-                  )}
-                </div>
+        <form onSubmit={handleSubmit} className="mt-8 grid gap-6 sm:grid-cols-[auto,1fr]">
+          {/* live preview card */}
+          <div className="person-card sm:w-56 h-fit items-center text-center">
+            <UserAvatar src={form.profilePic} name={authUser?.fullName} size="xl" />
+            <div>
+              <p className="font-extrabold">{authUser?.fullName}</p>
+              <p className="text-xs text-base-content/60">{form.location || "Your city"}</p>
+            </div>
+            <LanguagePair native={form.nativeLanguage} learning={form.learningLanguage} compact />
+            <button type="button" onClick={handleRandomAvatar} className="btn btn-sm btn-outline rounded-full gap-2">
+              <IoShuffleOutline className="size-4" />
+              New avatar
+            </button>
+          </div>
 
-                {/* Generate Random Avatar BTN */}
-                <div className="flex items-center text-sm font-medium">
-                  <button
-                    type="button"
-                    onClick={handleRandomAvator}
-                    className="btn btn-accent"
-                  >
-                    <FaShuffle className="size-3" />
-                    Generate Avatar
-                  </button>
-                </div>
-              </div>
+          <div className="space-y-5">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <label className="form-control">
+                <span className="label-text font-semibold mb-1.5">I speak</span>
+                <select value={form.nativeLanguage} onChange={field("nativeLanguage")} className="select select-bordered rounded-2xl" required>
+                  <option value="">Choose a language</option>
+                  {LANGUAGES.map((l) => (
+                    <option key={`n-${l}`} value={l.toLowerCase()}>{l}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="form-control">
+                <span className="label-text font-semibold mb-1.5">I'm learning</span>
+                <select value={form.learningLanguage} onChange={field("learningLanguage")} className="select select-bordered rounded-2xl" required>
+                  <option value="">Choose a language</option>
+                  {LANGUAGES.map((l) => (
+                    <option key={`l-${l}`} value={l.toLowerCase()}>{l}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
 
-              {/* BIO */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Bio</span>
-                </label>
-                <textarea
-                  name="bio"
-                  value={form.bio}
-                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                  className="textarea textarea-bordered h-16 rounded-sm"
-                  placeholder="Tell others about yourself and your language learning goals"
+            <label className="form-control">
+              <span className="label-text font-semibold mb-1.5">Where are you based?</span>
+              <div className="relative">
+                <IoLocationOutline className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-base-content/50" />
+                <input
+                  type="text"
+                  value={form.location}
+                  onChange={field("location")}
+                  className="input input-bordered rounded-2xl w-full pl-11"
+                  placeholder="City, country"
+                  required
                 />
               </div>
+            </label>
 
-              {/* LANGUAGES */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* NATIVE LANGUAGE */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Native Language</span>
-                  </label>
-                  <select
-                    name="nativeLanguage"
-                    value={form.nativeLanguage}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        nativeLanguage: e.target.value,
-                      })
-                    }
-                    className="select select-bordered w-full h-10 rounded-sm"
-                  >
-                    <option value="">Select your native language</option>
-                    {LANGUAGES.map((lang) => (
-                      <option key={`native-${lang}`} value={lang.toLowerCase()}>
-                        {lang}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <label className="form-control">
+              <span className="label-text font-semibold mb-1.5">About you</span>
+              <textarea
+                value={form.bio}
+                onChange={field("bio")}
+                className="textarea textarea-bordered rounded-2xl h-28 text-base"
+                placeholder="What do you want to practise, and what are you into?"
+                maxLength={280}
+                required
+              />
+              <span className="label-text-alt text-base-content/50 mt-1 self-end">{form.bio.length}/280</span>
+            </label>
 
-                {/* LEARNING LANGUAGE */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Learning language</span>
-                  </label>
-                  <select
-                    name="learningLanguage"
-                    value={form.learningLanguage}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        learningLanguage: e.target.value,
-                      })
-                    }
-                    className="select select-bordered w-full h-10 rounded-sm"
-                  >
-                    <option value="">Select language you're learning</option>
-                    {LANGUAGES.map((lang) => (
-                      <option
-                        key={`learning-${lang}`}
-                        value={lang.toLowerCase()}
-                      >
-                        {lang}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* LOCATION */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Location</span>
-                </label>
-                <div className="relative">
-                  <LuMapPin className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
-                  <input
-                    type="text"
-                    name="location"
-                    value={form.location}
-                    onChange={(e) =>
-                      setForm({ ...form, location: e.target.value })
-                    }
-                    className="input input-bordered w-full pl-10 h-10 rounded-sm"
-                    placeholder="City, Country"
-                  />
-                </div>
-              </div>
-
-              {/* SUBMIT BUTTON */}
-
-              <button
-                className="btn btn-primary w-full h-10 rounded-md"
-                disabled={isPending}
-                type="submit"
-              >
-                {!isPending ? (
-                  <>
-                    <LuShipWheel className="size-5 mr-2" />
-                    Complete Onboarding
-                  </>
-                ) : (
-                  <>
-                    <LuLoader className="animate-spin size-5 mr-2" />
-                    Onboarding...
-                  </>
-                )}
-              </button>
-            </form>
+            <button className="btn btn-primary rounded-2xl w-full" disabled={isPending} type="submit">
+              {isPending ? <span className="loading loading-spinner loading-sm" /> : "Finish and find partners"}
+            </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

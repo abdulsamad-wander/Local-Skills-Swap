@@ -1,12 +1,10 @@
-import { LuLoader } from "react-icons/lu";
-
-function ChatLoader() {
-  return (
-    <div className="h-screen flex flex-col items-center justify-center p-4">
-      <LuLoader className="animate-spin size-10 text-primary" />
-      <p className="mt-4 text-center text-lg font-mono">Connecting to chat...</p>
+const ChatLoader = () => (
+  <div className="h-full min-h-[60vh] grid place-items-center">
+    <div className="flex flex-col items-center gap-3">
+      <span className="loading loading-dots loading-lg text-primary" />
+      <p className="font-semibold text-base-content/70">Opening conversation</p>
     </div>
-  );
-}
+  </div>
+);
 
 export default ChatLoader;
