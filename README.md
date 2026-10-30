@@ -168,8 +168,7 @@ speakzen/
 
 ## 👨‍💻 Author
 
-**Abdul Rehman**  
-Founder, [The Digital Marketing (TDM)](https://thedigitalmarketing.services)
+**Abdul Samad**  
 
 MERN Stack · Real-Time Systems · Full-Stack Product Development
 
